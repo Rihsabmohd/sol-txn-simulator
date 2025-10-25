@@ -50,18 +50,35 @@ interface ResultsCardProps {
 
 export default function ResultsCard({ result }: ResultsCardProps) {
   const {
-    expectedOut,
-    priceImpactPct,
-    route,
-    tokenIn,
-    tokenOut,
-    success,
-    computeUnitsUsed,
-    accountsRead,
-    mevRisk,
-    priorityFees,
-    costAnalysis,
-  } = result;
+    expectedOut = 0,
+    priceImpactPct = 0,
+    route = [],
+    tokenIn = "",
+    tokenOut = "",
+    success = false,
+    computeUnitsUsed = 0,
+    accountsRead = 0,
+    mevRisk = {
+      riskScore: 0,
+      riskLevel: "LOW",
+      sandwichRisk: false,
+      frontrunRisk: false,
+      estimatedMEVLoss: 0,
+      recommendations: [],
+      details: { priceImpactRisk: 0, liquidityRisk: 0, profitabilityRisk: 0 },
+    },
+    priorityFees = {
+      recommended: 0,
+      landingProbability: [],
+      networkCongestion: "LOW",
+    },
+    costAnalysis = {
+      totalFeeUSD: 0,
+      computeUnitPrice: 0,
+      breakdown: { networkFee: "0", priorityFee: "0", total: "0" },
+    },
+  } = result || {};
+  
 
   // Risk level colors
   const getRiskColor = (level: string) => {
@@ -115,7 +132,8 @@ export default function ResultsCard({ result }: ResultsCardProps) {
           <div>
             <div className="text-green-500/60">Expected Output</div>
             <div className="text-green-400 font-bold text-lg">
-              {expectedOut.toFixed(6)} {tokenOut}
+            {typeof expectedOut === "number" ? expectedOut.toFixed(6) : "—"} {tokenOut}
+
             </div>
           </div>
           <div>
@@ -125,7 +143,7 @@ export default function ResultsCard({ result }: ResultsCardProps) {
                 priceImpactPct > 2 ? 'text-red-400' : 'text-green-400'
               }`}
             >
-              {priceImpactPct.toFixed(3)}%
+              {Number(priceImpactPct).toFixed(3)}%
             </div>
           </div>
         </div>
