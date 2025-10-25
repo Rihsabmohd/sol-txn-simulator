@@ -10,6 +10,7 @@ export default function Home() {
   const [result, setResult] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [walletAddress, setWalletAddress] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const [tokenIn, setTokenIn] = useState<any>(null);
   const [tokenOut, setTokenOut] = useState<any>(null);
@@ -30,6 +31,7 @@ export default function Home() {
         amountIn, // Already a number
         tokenIn.decimals,
         tokenOut.decimals,
+        walletAddress || undefined
       );
 
       if (simulationResult) {
@@ -243,7 +245,7 @@ export default function Home() {
           background: rgba(0, 255, 0, 0.05);
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(34, 197, 94, 0.3);
+          background: rgba(34, 196, 93, 0.3);
           border-radius: 4px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
