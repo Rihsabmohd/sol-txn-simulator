@@ -94,6 +94,8 @@ export async function simulateSwap(
   try {
     if (!inputMint || !outputMint) throw new Error("Missing token mints");
 
+    console.log("Starting simulation:", { inputMint, outputMint, amountIn });
+
     // 1. Get Jupiter Quote
     const quote = await getJupiterQuote(
       inputMint,
@@ -103,11 +105,16 @@ export async function simulateSwap(
       slippageBps
     );
 
-    if (!quote) return null;
+    if (!quote) {
+      console.error("No quote received from Jupiter");
+      return null;
+    }
 
-    // 2. Calculate basic results
+    console.log("Quote received:", quote);
+
+    // 2. Calculate basic results (Lite API format)
     const expectedOut = Number(quote.outAmount) / Math.pow(10, outputDecimals);
-    const priceImpact = quote.priceImpactPct || 0;
+    const priceImpact = parseFloat(quote.priceImpactPct || "0");
     const route = extractRoute(quote);
 
     // 3. Get Priority Fee Analysis
@@ -157,6 +164,15 @@ export async function simulateSwap(
     };
   } catch (err) {
     console.error("simulateSwap error:", err);
+    
+    // Provide more helpful error message
+    if (err instanceof Error) {
+      if (err.message.includes("Failed to fetch")) {
+        throw new Error("Network error: Unable to connect to Jupiter API. Please check your internet connection.");
+      }
+      throw err;
+    }
+    
     return null;
   }
 }
@@ -174,18 +190,31 @@ async function getJupiterQuote(
     Math.floor(amountIn * Math.pow(10, inputDecimals))
   ).toString();
 
-  const url = `https://quote-api.jup.ag/v6/quote?inputMint=${encodeURIComponent(
+  // Using Jupiter Lite API V1
+  const url = `https://lite-api.jup.ag/swap/v1/quote?inputMint=${encodeURIComponent(
     inputMint
   )}&outputMint=${encodeURIComponent(
     outputMint
-  )}&amount=${rawAmount}&slippageBps=${slippageBps}`;
+  )}&amount=${rawAmount}&slippageBps=${slippageBps}&restrictIntermediateTokens=true`;
 
-  const res = await fetch(url);
+  console.log("Fetching Jupiter quote:", url);
+
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+    },
+  });
+
   if (!res.ok) {
-    throw new Error(`Jupiter quote failed: ${res.status}`);
+    const errorText = await res.text().catch(() => "Unknown error");
+    console.error("Jupiter API error:", res.status, errorText);
+    throw new Error(`Jupiter quote failed: ${res.status} - ${errorText}`);
   }
 
-  return await res.json();
+  const data = await res.json();
+  console.log("Jupiter quote response:", data);
+  return data;
 }
 
 async function simulateTransaction(
@@ -193,8 +222,8 @@ async function simulateTransaction(
   walletPublicKey: string
 ): Promise<any> {
   try {
-    // Get swap transaction
-    const swapResponse = await fetch("https://quote-api.jup.ag/v6/swap", {
+    // Get swap transaction from Jupiter Lite API
+    const swapResponse = await fetch("https://lite-api.jup.ag/swap/v1/swap", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -202,6 +231,7 @@ async function simulateTransaction(
         userPublicKey: walletPublicKey,
         wrapAndUnwrapSol: true,
         dynamicComputeUnitLimit: true,
+        prioritizationFeeLamports: "auto",
       }),
     });
 
@@ -413,9 +443,10 @@ function calculateCostAnalysis(
 function extractRoute(quote: any): string[] {
   const route: string[] = [];
 
+  // Jupiter Lite API format
   if (Array.isArray(quote.routePlan)) {
     quote.routePlan.forEach((r: any) => {
-      const label = r?.swapInfo?.label || r?.label || null;
+      const label = r?.swapInfo?.label || null;
       if (label) route.push(label);
     });
   }
