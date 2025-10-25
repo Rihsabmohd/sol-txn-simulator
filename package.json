@@ -1,30 +1,44 @@
 {
-  "name": "tx-simulator",
-  "version": "0.1.0",
+  "name": "sol-txn-simulator",
+  "version": "2.0.0",
+  "description": "MEV-Protected Solana Transaction Simulator for DeFi Trading",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "dev": "next dev",
+    "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "next lint"
   },
   "dependencies": {
-    "@jup-ag/api": "^6.0.44",
-    "@solana/web3.js": "^1.98.4",
-    "axios": "^1.12.2",
-    "next": "15.5.4",
-    "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "@solana/web3.js": "^1.95.3",
+    "next": "^15.0.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "15.5.4",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "@types/node": "^22.8.6",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "eslint": "^9.14.0",
+    "eslint-config-next": "^15.0.3",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.15",
+    "typescript": "^5.6.3"
+  },
+  "keywords": [
+    "solana",
+    "defi",
+    "mev",
+    "simulator",
+    "transaction",
+    "jupiter",
+    "amm",
+    "priority-fees"
+  ],
+  "author": "Mohammed Bashir Rihsab",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Rihsabmohd/sol-txn-simulator"
   }
 }
